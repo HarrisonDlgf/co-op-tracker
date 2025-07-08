@@ -1,0 +1,34 @@
+# for flask
+Flask==3.0.0
+Flask-CORS==4.0.0
+
+# pytestin
+pytest==7.4.0
+
+# for development
+python-dotenv==1.0.0
+
+# for data handling
+marshmallow==3.20.1
+
+# for database
+SQLAlchemy==2.0.23
+
+# for authentication
+firebase-admin==6.2.0
+
+# for HTTP requests
+requests==2.31.0
+
+# for date/time handling
+python-dateutil==2.8.2
+
+# for environment management
+python-decouple==3.8
+
+# for development server
+gunicorn==21.2.0
+
+# for code formatting and linting
+black==23.11.0
+flake8==6.1.0
