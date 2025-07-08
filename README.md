@@ -8,7 +8,7 @@ Co-Op Tracker Pro turns the Northeastern co-op search into a competitive, transp
 
 ## 🚀 Vision
 
-Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for students who are grinding through 30+ applications, refreshing NUworks at midnight, and writing cover letters for the 10th time — this app makes that process **fun, social, and transparent**.
+Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for students who are grinding through 100+ applications, refreshing NUworks at midnight, and writing cover letters for the 10th time — this app makes that process **fun, social, and transparent, and most importantly ranked**.
 
 ### 🔥 Core Goals
 
@@ -27,7 +27,7 @@ Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for studen
 | **Backend**  | Flask                    | REST API, XP logic, achievement engine   |
 | **Database** | SQLite → PostgreSQL      | Persist users, apps, offers, achievements |
 | **Auth**     | Firebase Auth (planned)  | Northeastern email login & user sessions |
-| **Hosting**  | Vercel (frontend), Render/Fly.io (backend) | Full deployment |
+| **Hosting**  | (planned) Vercel (frontend), Render/Fly.io (backend) | Full deployment |
 
 ---
 
@@ -47,7 +47,7 @@ Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for studen
 - ✏️ Application update support (with XP recalibration)
 
 ### 🧪 In Progress
-- 🔐 Firebase email auth (NEU filter)
+- 🔐 Firebase email auth (NEU only)
 - 🧾 SQLite persistence with SQLAlchemy
 - 🎨 React frontend MVP
   - Dashboard (XP bar, stats)
@@ -60,26 +60,12 @@ Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for studen
 - 🔥 Leaderboard:
   - Top XP earners across NEU
 - 💌 Bonus XP:
-  - Add resume, write a cover letter = bonus points
+  - Add resume, write a cover letter, and more for leveling up
 - 🧭 Cycle Tracker:
   - View stats per cycle (Spring/Summer/Fall)
 - 📥 CSV export/import
 - 🎖 Badge collection
 - 💬 Comments + upvotes on offers
-
----
-
-## 🧪 API Endpoints
-
-| Method | Route                        | Description                                 |
-|--------|-----------------------------|---------------------------------------------|
-| GET    | `/applications`             | Fetch all applications for user             |
-| POST   | `/applications`             | Add new application                         |
-| PUT    | `/applications/<id>`        | Update application + XP recalibration       |
-| GET    | `/user/profile`             | Full user profile (XP, level, stats)        |
-| GET    | `/achievements`             | All available + earned achievements         |
-
-> More endpoints (auth, feed, leaderboard) coming soon.
 
 ---
 
@@ -94,7 +80,7 @@ Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for studen
 
 ## 🧠 Who This Is For
 
-- 🧑‍🎓 Northeastern students applying for Spring, Summer, or Fall co-ops  
+- 🧑‍🎓 Northeastern students applying for Spring or Fall co-ops  
 - 🧑‍💻 Students who want structure and momentum in their application process  
 - 💸 Students who want pay transparency and offer insight before they commit
 
