@@ -1,4 +1,4 @@
-# 🧠 Co-Op Tracker Pro: Ranked Mode 🎮
+# 🧠 Co-Op Tracker Pro: Earn XP and Job Offers Simulatenously 🎮
 
 Co-Op Tracker Pro turns the boring, sometimes rough Northeastern co-op search into a competitive, transparent, and gamified experience. I designed this to support, motivate, and empower students through one of the most overwhelming parts of college: thinking about your future.
 
@@ -24,9 +24,8 @@ Co-Op Tracker Pro isn’t just to be a spreadsheet but to be a platform for all.
 | **Frontend** | React (Tailwind/Bootstrap) | UI/UX for dashboard, forms, social feed  |
 | **Backend**  | Flask                    | REST API, XP logic, achievement engine   |
 | **Database** | SQLAlchemy               | Persist users, apps, offers, achievements |
---------------------------------------- PLANNED FOR FUTURE ------------------------------
-| **Auth**     | Firebase Auth (planned)  | Northeastern email login & user sessions |
-| **Hosting**  | (planned) Vercel (frontend), Render/Fly.io (backend) | Full deployment |
+| **Auth** (PLANNED)     | Firebase Auth (planned)  | Northeastern email login & user sessions |
+| **Hosting** (PLANNED) | (planned) Vercel (frontend), Render/Fly.io (backend) | Full deployment |
 
 ---
 
