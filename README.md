@@ -1,18 +1,16 @@
 # 🧠 Co-Op Tracker Pro: Ranked Mode 🎮
 
-_“Applying to jobs is the game. Your career is the prize.”_
-
-Co-Op Tracker Pro turns the Northeastern co-op search into a competitive, transparent, and gamified experience — designed to support, motivate, and empower students through one of the most overwhelming parts of college: getting that next opportunity.
+Co-Op Tracker Pro turns the boring, sometimes rough Northeastern co-op search into a competitive, transparent, and gamified experience. I designed this to support, motivate, and empower students through one of the most overwhelming parts of college: thinking about your future.
 
 ---
 
 ## 🚀 Vision
 
-Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for students who are grinding through 100+ applications, refreshing NUworks at midnight, and writing cover letters for the 10th time — this app makes that process **fun, social, and transparent, and most importantly ranked**.
+Co-Op Tracker Pro isn’t just to be a spreadsheet but to be a platform for all. Created for students who are grinding through 100+ applications, refreshing NUworks at midnight, and writing cover letters over and over again, this site makes that process **fun, social, and transparent, and most importantly a game**.
 
 ### 🔥 Core Goals
 
-- **Ranked applications**: Earn XP for applying, writing cover letters, and moving forward in the process
+- **Earn XP for applications**: Earn XP for applying, writing cover letters, and moving forward in the process
 - **Gamified progress**: Level up, unlock achievements, and track your growth across co-op cycles
 - **Student transparency**: Offer a real-time feed of co-op offers with roles, pay, and insight for wage visibility
 - **Community support**: Comment, upvote, and celebrate your peers’ wins
@@ -25,15 +23,16 @@ Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for studen
 |--------------|--------------------------|------------------------------------------|
 | **Frontend** | React (Tailwind/Bootstrap) | UI/UX for dashboard, forms, social feed  |
 | **Backend**  | Flask                    | REST API, XP logic, achievement engine   |
-| **Database** | SQLite → PostgreSQL      | Persist users, apps, offers, achievements |
+| **Database** | SQLAlchemy               | Persist users, apps, offers, achievements |
+--------------------------------------- PLANNED FOR FUTURE ------------------------------
 | **Auth**     | Firebase Auth (planned)  | Northeastern email login & user sessions |
 | **Hosting**  | (planned) Vercel (frontend), Render/Fly.io (backend) | Full deployment |
 
 ---
 
-## ✨ Features
+## Features
 
-### ✅ MVP (Completed)
+### ✅ MVP for Backend (Completed)
 - 🔁 Application logging with:
   - Company, role, status, wage, hybrid type
   - Cover letter, benefits (optional)
@@ -41,10 +40,10 @@ Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for studen
   - +10 for Applied, +20 for Interviewing, +50 for Offer
 - 🧗 Leveling system: Level up every 100 XP
 - 🏅 Achievement engine:
-  - First app, 10 apps, 5 interviews, 1 offer, level 2, 500 XP
+  - Achievements given based on criteria being met in a user's profile
 - 📊 User profile:
   - Interview rate, offer rate, total XP, level, achievements
-- ✏️ Application update support (with XP recalibration)
+  - Models created and connected to a DB
 
 ### 🧪 In Progress
 - 🔐 Firebase email auth (NEU only)
@@ -55,13 +54,13 @@ Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for studen
   - Achievement cards
 
 ### 🔮 Planned
-- 🏆 Offer Feed:
+- Offer Feed:
   - Public posts for accepted co-ops (role, pay, emoji, story)
-- 🔥 Leaderboard:
+-  Leaderboard:
   - Top XP earners across NEU
 - 💌 Bonus XP:
   - Add resume, write a cover letter, and more for leveling up
-- 🧭 Cycle Tracker:
+- Cycle Tracker:
   - View stats per cycle (Spring/Summer/Fall)
 - 📥 CSV export/import
 - 🎖 Badge collection
@@ -69,27 +68,13 @@ Co-Op Tracker Pro isn’t just a tracker — it’s a platform. Built for studen
 
 ---
 
-## 📸 Screenshots (Coming Soon)
-
-- Dashboard with XP bar + level
-- Application log and form
-- Offer feed UI
-- Achievement badges
-
----
-
 ## 🧠 Who This Is For
 
-- 🧑‍🎓 Northeastern students applying for Spring or Fall co-ops  
+- 🧑‍🎓 Northeastern students applying for co-ops  
 - 🧑‍💻 Students who want structure and momentum in their application process  
 - 💸 Students who want pay transparency and offer insight before they commit
 
 ---
 
-## 🛠 Setup Instructions
-
-1. Clone the repo  
-2. Create a virtual environment and activate it  
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
+If you would like to contribute or fork this repository, please reach out beforehand. 
+Thanks, Harrison Dolgoff
