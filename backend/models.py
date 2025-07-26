@@ -3,38 +3,36 @@ from database import db
 
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    company = db.Column(db.String(120))
-    role = db.Column(db.String(120))
-    status = db.Column(db.String(50)) #TODO: may want an enum: applied, interviewing, offer, rejected
-    date_applied = db.Column(db.DateTime)
-    location = db.Column(db.String(50)) # can be hybrid, remote, in-person
-    hybrid_support = db.Column(db.String(50)) # can be partial, full, none
-    hourly_wage = db.Column(db.Integer)
-    salary = db.Column(db.Integer, nullable=True) 
-    notes = db.Column(db.Text) #want this data type to be large
-    potential_benefits = db.Column(db.String(120), nullable=True) 
-    xp = db.Column(db.Integer, default=0) #xp earned for this application
+    company = db.Column(db.String(100), nullable=False)
+    position = db.Column(db.String(100), nullable=False)
+    status = db.Column(db.String(50), nullable=False)  # Applied, Interviewing, Offer, Rejected
+    applied_date = db.Column(db.DateTime, nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # add a fk to user, each application belongs to one user
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) 
+    # Foreign key to user
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 class Achievement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    description = db.Column(db.Text)
-    icon = db.Column(db.String(100))
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    icon = db.Column(db.String(10), nullable=False)
     condition_met = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # add a fk to user, each achievement belongs to one user
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(100), unique=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    google_id = db.Column(db.String(100), unique=True, nullable=True)
+    profile_picture = db.Column(db.String(500), nullable=True)
     xp = db.Column(db.Integer, default=0)
     level = db.Column(db.Integer, default=1)
-    joined = db.Column(db.DateTime, default=datetime.now)
+    joined = db.Column(db.DateTime, default=datetime.utcnow)
     
     applications = db.relationship('Application', backref='user', lazy=True, cascade='all, delete-orphan')
     achievements = db.relationship('Achievement', backref='user', lazy=True, cascade='all, delete-orphan')
