@@ -33,6 +33,8 @@ frontend/
 ```
 ├── requirements.txt    # Python dependencies
 ├── .gitignore         # Git ignore rules
+├── .cursorignore      # Cursor IDE ignore rules
+├── .vscode/settings.json # VS Code/Cursor settings
 ├── README.md          # Project documentation
 └── PROJECT_STRUCTURE.md # This file
 ```
@@ -52,7 +54,8 @@ frontend/
 - `.env*` - Environment files
 
 ### IDE/OS Generated
-- `.vscode/`, `.idea/` - IDE settings
+- `.vscode/` (except settings.json) - VS Code settings
+- `.idea/` - IntelliJ settings
 - `.DS_Store` - macOS system files
 - `*.log` - Log files
 
@@ -84,4 +87,13 @@ frontend/
 - React handles complex UI interactions (XP bars, achievements)
 - Flask provides simple, fast API endpoints
 - Easy to test and deploy separately
-- Clear separation of concerns 
+- Clear separation of concerns
+
+## 🖥️ IDE Configuration
+
+The project includes IDE-specific configuration files:
+- **`.vscode/settings.json`** - Hides generated files in VS Code/Cursor
+- **`.cursorignore`** - Tells Cursor IDE what to ignore
+- **`.gitignore`** - Prevents committing generated files
+
+This keeps your file explorer and source control clean! 🧹 
