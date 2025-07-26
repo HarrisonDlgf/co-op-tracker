@@ -6,7 +6,7 @@ from database import db
 app = Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cooptracker.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coop_tracker.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize DB
