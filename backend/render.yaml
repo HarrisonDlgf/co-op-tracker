@@ -17,6 +17,9 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: https://your-frontend.vercel.app
+    buildFilter:
+      paths:
+        - backend/**
     healthCheckPath: /health
     autoDeploy: true
 
