@@ -419,6 +419,15 @@ def revoke_achievements():
         'level': current_user.level
     })
 
+@app_routes.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for deployment monitoring"""
+    return jsonify({
+        'status': 'healthy',
+        'message': 'Co-op Tracker API is running',
+        'timestamp': datetime.now(timezone.utc).isoformat()
+    })
+
 @app_routes.route('/achievements', methods=['GET'])
 def get_achievements():
     current_user = get_current_user()

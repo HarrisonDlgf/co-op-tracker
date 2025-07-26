@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: coop-tracker-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.7
+      - key: FLASK_ENV
+        value: production
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://your-frontend.vercel.app
+    healthCheckPath: /health
+    autoDeploy: true
+
+databases:
+  - name: coop-tracker-db
+    plan: free
+    databaseName: coop_tracker
+    user: coop_tracker_user 
