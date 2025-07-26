@@ -1,7 +1,8 @@
-# 🧠 Co-Op Tracker Pro: Earn XP and Job Offers Simulatenously 🎮
+# 🐺 Co-Op Tracker Pro: Earn XP and Job Offers Simulatenously 🎮
 
 Co-Op Tracker Pro turns the boring, sometimes rough Northeastern co-op search into a competitive, transparent, and gamified experience. I designed this to support, motivate, and empower students through one of the most overwhelming parts of college: thinking about your future.
 
+**Co-Op Tracker is now live!** Link: https://co-op-tracker-orcin.vercel.app
 ---
 
 ## 🚀 Vision
@@ -26,7 +27,7 @@ Co-Op Tracker Pro isn’t just to be a spreadsheet but to be a platform for all.
 | **Database** | SQLite (dev) / PostgreSQL (prod) | Persist users, apps, offers, achievements |
 | **Auth**     | Google OAuth + JWT      | Northeastern email login & user sessions |
 | **Charts**   | Chart.js + react-chartjs-2 | Data visualization and analytics |
-| **Hosting** (PLANNED) | Vercel (frontend), Railway (backend) | Full deployment |
+| **Hosting**  | Vercel (frontend), Render (backend) | Full deployment |
 
 ---
 
@@ -90,9 +91,10 @@ Co-Op Tracker Pro isn’t just to be a spreadsheet but to be a platform for all.
 ## 🚀 **Quick Start**
 
 ### **Prerequisites**
-- Node.js (v16+)
-- Python (v3.8+)
-- Google OAuth credentials
+- Node.js (v18+) - The frontend uses React 18.2.0 and modern React features
+- Python (v3.11+)
+- PostgreSQL  
+- Google OAuth credentials - Required for authentication with Northeastern email validation
 
 ### **Backend Setup**
 ```bash
@@ -162,6 +164,7 @@ If you would like to contribute or fork this repository, please reach out before
 
 **Current Focus Areas:**
 - Offer Feed development
+  - System Design aspect to scale a safe message board for users
 - Leaderboard implementation
 - Production deployment
 - Performance optimization
