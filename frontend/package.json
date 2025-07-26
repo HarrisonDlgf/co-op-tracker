@@ -2,15 +2,22 @@
   "name": "coop-tracker-frontend",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:5001",
   "dependencies": {
+    "@headlessui/react": "^1.7.13",
+    "@heroicons/react": "^2.0.17",
+    "@react-oauth/google": "^0.12.1",
+    "axios": "^1.3.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.43.5",
+    "react-router-dom": "^6.8.0",
     "react-scripts": "5.0.1"
   },
   "devDependencies": {
-    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0",
-    "autoprefixer": "^10.4.0"
+    "tailwindcss": "^3.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
