@@ -158,6 +158,31 @@ def check_and_award_achievements(user: User):
     
     return new_achievements, total_xp_gained
 
+def check_and_revoke_achievements(user: User):
+    revoked_achievements = []
+    total_xp_lost = 0
+    
+    user_achievements = Achievement.query.filter_by(user_id=user.id).all()
+    
+    for achievement in user_achievements:
+        achievement_definition = next((achievement_def for achievement_def in ACHIEVEMENTS if achievement_def['name'] == achievement.name), None)
+        
+        if achievement_definition and not achievement_definition['condition'](user):
+            xp_reward = achievement_definition.get('xp_reward', 0)
+            if xp_reward > 0:
+                user.xp -= xp_reward
+                total_xp_lost += xp_reward
+            
+            db.session.delete(achievement)
+            revoked_achievements.append(achievement)
+    
+    if revoked_achievements or total_xp_lost > 0:
+        if total_xp_lost > 0:
+            user.level = get_level(user.xp)
+        db.session.commit()
+    
+    return revoked_achievements, total_xp_lost
+
 @app_routes.route('/applications', methods=['GET'])
 def get_all_apps():
     current_user = get_current_user()
@@ -286,6 +311,9 @@ def update_app(app_id):
     # Check for new achievements
     new_achievements, xp_from_achievements = check_and_award_achievements(current_user)
     
+    # Check for revoked achievements (in case status change affects qualifications)
+    revoked_achievements, xp_lost = check_and_revoke_achievements(current_user)
+    
     return jsonify({
         'application': {
             'id': app.id,
@@ -296,8 +324,10 @@ def update_app(app_id):
             'notes': app.notes,
             'created_at': app.created_at.isoformat()
         },
-        'xp_gained': xp_gained + xp_from_achievements,
-        'new_achievements': [{'name': a.name, 'icon': a.icon} for a in new_achievements]
+        'xp_gained': xp_gained + xp_from_achievements - xp_lost,
+        'new_achievements': [{'name': a.name, 'icon': a.icon} for a in new_achievements],
+        'revoked_achievements': [{'name': a.name, 'icon': a.icon} for a in revoked_achievements],
+        'xp_lost': xp_lost
     })
 
 @app_routes.route('/applications/<int:app_id>', methods=['DELETE'])
@@ -313,7 +343,14 @@ def delete_app(app_id):
     db.session.delete(app)
     db.session.commit()
     
-    return jsonify({'message': 'Application deleted successfully'})
+    # Revoke achievements if user no longer qualifies
+    revoked_achievements, xp_lost = check_and_revoke_achievements(current_user)
+    
+    return jsonify({
+        'message': 'Application deleted successfully',
+        'revoked_achievements': [{'name': a.name, 'icon': a.icon} for a in revoked_achievements],
+        'xp_lost': xp_lost
+    })
 
 @app_routes.route('/user/profile', methods=['GET'])
 def get_user_profile():
@@ -361,6 +398,23 @@ def check_achievements():
     return jsonify({
         'new_achievements': [{'name': a.name, 'icon': a.icon, 'xp_reward': ACHIEVEMENTS[next(i for i, ach in enumerate(ACHIEVEMENTS) if ach['name'] == a.name)]['xp_reward']} for a in new_achievements],
         'xp_gained': xp_gained,
+        'total_xp': current_user.xp,
+        'level': current_user.level
+    })
+
+@app_routes.route('/achievements/revoke', methods=['POST'])
+def revoke_achievements():
+    """Manually check and revoke achievements for current user"""
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Check for revoked achievements
+    revoked_achievements, xp_lost = check_and_revoke_achievements(current_user)
+    
+    return jsonify({
+        'revoked_achievements': [{'name': a.name, 'icon': a.icon, 'xp_reward': ACHIEVEMENTS[next(i for i, ach in enumerate(ACHIEVEMENTS) if ach['name'] == a.name)]['xp_reward']} for a in revoked_achievements],
+        'xp_lost': xp_lost,
         'total_xp': current_user.xp,
         'level': current_user.level
     })
