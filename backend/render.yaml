@@ -3,6 +3,7 @@ services:
     name: coop-tracker-backend
     env: python
     plan: free
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
