@@ -1,62 +1,121 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { 
-  PlusIcon, 
-  PencilIcon, 
-  TrashIcon,
-  EyeIcon,
-  EyeSlashIcon
-} from '@heroicons/react/24/outline';
+import { PlusIcon, BuildingOfficeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+
+// Import components
+import StatsCards from '../components/StatsCards';
+import FilterPanel from '../components/FilterPanel';
+import SortControls from '../components/SortControls';
+import ApplicationCard from '../components/ApplicationCard';
+import ApplicationForm from '../components/ApplicationForm';
+
+// Import custom hook
+import useFilteredAndSorted from '../hooks/useFilteredAndSorted';
 
 const Applications = () => {
   const { applications, addApplication, updateApplication, deleteApplication } = useApp();
+  const location = useLocation();
+  
+  // State management
   const [showForm, setShowForm] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
-  const [showNotes, setShowNotes] = useState({});
+  const [showFilters, setShowFilters] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  // Filter state
+  const [filters, setFilters] = useState({
+    status: 'all',
+    company: '',
+    position: '',
+    dateFrom: '',
+    dateTo: ''
+  });
 
-  const onSubmit = async (data) => {
+  // Sort state
+  const [sortBy, setSortBy] = useState('applied_date');
+  const [sortOrder, setSortOrder] = useState('desc');
+
+  // Handle URL parameters for pre-applied filters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const statusFilter = searchParams.get('status');
+    
+    if (statusFilter && ['Applied', 'Interviewing', 'Offer', 'Rejected'].includes(statusFilter)) {
+      setFilters(prev => ({
+        ...prev,
+        status: statusFilter
+      }));
+      // Auto-show filters when coming from dashboard
+      setShowFilters(true);
+    }
+  }, [location.search]);
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const total = applications.length;
+    const applied = applications.filter(app => app.status === 'Applied').length;
+    const interviewing = applications.filter(app => app.status === 'Interviewing').length;
+    const offers = applications.filter(app => app.status === 'Offer').length;
+    const rejected = applications.filter(app => app.status === 'Rejected').length;
+    
+    return { total, applied, interviewing, offers, rejected };
+  }, [applications]);
+
+  // Use custom hook for filtering and sorting
+  const filteredAndSortedApps = useFilteredAndSorted(applications, filters, sortBy, sortOrder);
+
+  // Memoized handlers with useCallback
+  const handleSubmit = useCallback(async (data) => {
+    setIsSubmitting(true);
     try {
       if (editingApp) {
         await updateApplication(editingApp.id, data);
       } else {
         await addApplication(data);
       }
-      reset();
       setShowForm(false);
       setEditingApp(null);
     } catch (error) {
       console.error('Error saving application:', error);
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }, [editingApp, addApplication, updateApplication]);
 
-  const handleDeleteApplication = async (id) => {
+  const handleCancel = useCallback(() => {
+    setShowForm(false);
+    setEditingApp(null);
+  }, []);
+
+  const handleDeleteApplication = useCallback(async (id) => {
     if (!window.confirm('Are you sure you want to delete this application?')) return;
-    
     try {
       await deleteApplication(id);
     } catch (error) {
       console.error('Error deleting application:', error);
     }
-  };
+  }, [deleteApplication]);
 
-  const editApplication = (app) => {
+  const editApplication = useCallback((app) => {
     setEditingApp(app);
-    reset(app);
     setShowForm(true);
-  };
+  }, []);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Applied': return 'bg-blue-100 text-blue-800';
-      case 'Interviewing': return 'bg-yellow-100 text-yellow-800';
-      case 'Offer': return 'bg-green-100 text-green-800';
-      case 'Rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const clearFilters = useCallback(() => {
+    setFilters({
+      status: 'all',
+      company: '',
+      position: '',
+      dateFrom: '',
+      dateTo: ''
+    });
+  }, []);
+
+  const handleAddNew = useCallback(() => {
+    setShowForm(true);
+    setEditingApp(null);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -67,193 +126,109 @@ const Applications = () => {
           <p className="text-gray-600 mt-1">Track your co-op applications and progress</p>
         </div>
         <button
-          onClick={() => {
-            setShowForm(true);
-            setEditingApp(null);
-            reset();
-          }}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          onClick={handleAddNew}
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          aria-label="Add new application"
         >
-          <PlusIcon className="h-5 w-5 mr-2" />
+          <PlusIcon className="h-5 w-5 mr-2" aria-hidden="true" />
           Add Application
         </button>
       </div>
 
+      {/* Stats Cards */}
+      <StatsCards stats={stats} />
+
       {/* Add/Edit Form */}
       {showForm && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">
-            {editingApp ? 'Edit Application' : 'Add New Application'}
-          </h2>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Company *
-                </label>
-                <input
-                  type="text"
-                  {...register('company', { required: 'Company is required' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                {errors.company && (
-                  <p className="text-red-500 text-sm mt-1">{errors.company.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Position *
-                </label>
-                <input
-                  type="text"
-                  {...register('position', { required: 'Position is required' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                {errors.position && (
-                  <p className="text-red-500 text-sm mt-1">{errors.position.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status *
-                </label>
-                <select
-                  {...register('status', { required: 'Status is required' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select status</option>
-                  <option value="Applied">Applied</option>
-                  <option value="Interviewing">Interviewing</option>
-                  <option value="Offer">Offer</option>
-                  <option value="Rejected">Rejected</option>
-                </select>
-                {errors.status && (
-                  <p className="text-red-500 text-sm mt-1">{errors.status.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Applied Date
-                </label>
-                <input
-                  type="date"
-                  {...register('applied_date')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Notes
-              </label>
-              <textarea
-                {...register('notes')}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Add any notes about this application..."
-              />
-            </div>
-
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingApp(null);
-                  reset();
-                }}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {editingApp ? 'Update' : 'Add'} Application
-              </button>
-            </div>
-          </form>
-        </div>
+        <ApplicationForm
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          editingApp={editingApp}
+          isSubmitting={isSubmitting}
+        />
       )}
 
-      {/* Applications List */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            All Applications ({applications.length})
-          </h3>
+      {/* Filters and Sort */}
+      <div className="bg-white rounded-lg shadow border border-gray-200">
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Applications ({filteredAndSortedApps.length})
+              </h3>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="inline-flex items-center px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors focus:ring-2 focus:ring-gray-500 focus:outline-none"
+                aria-expanded={showFilters}
+                aria-controls="filter-panel"
+              >
+                <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+                </svg>
+                Filters
+              </button>
+            </div>
+            
+            <SortControls
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              sortOrder={sortOrder}
+              setSortOrder={setSortOrder}
+            />
+          </div>
         </div>
-        
-        {applications.length === 0 ? (
-          <div className="px-6 py-8 text-center">
-            <p className="text-gray-500">No applications yet. Add your first one to get started!</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-200">
-            {applications.map((app) => (
-              <div key={app.id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
-                      <h4 className="text-lg font-medium text-gray-900">{app.company}</h4>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(app.status)}`}>
-                        {app.status}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 mt-1">{app.position}</p>
-                    {app.applied_date && (
-                      <p className="text-sm text-gray-500 mt-1">
-                        Applied: {new Date(app.applied_date).toLocaleDateString()}
-                      </p>
-                    )}
-                    {app.notes && (
-                      <div className="mt-2">
-                        <button
-                          onClick={() => setShowNotes(prev => ({ ...prev, [app.id]: !prev[app.id] }))}
-                          className="flex items-center text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          {showNotes[app.id] ? (
-                            <EyeSlashIcon className="h-4 w-4 mr-1" />
-                          ) : (
-                            <EyeIcon className="h-4 w-4 mr-1" />
-                          )}
-                          {showNotes[app.id] ? 'Hide' : 'Show'} Notes
-                        </button>
-                        {showNotes[app.id] && (
-                          <p className="text-sm text-gray-600 mt-1 bg-gray-50 p-2 rounded">
-                            {app.notes}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => editApplication(app)}
-                      className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteApplication(app.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+
+        {/* Filter Panel */}
+        <FilterPanel
+          filters={filters}
+          setFilters={setFilters}
+          showFilters={showFilters}
+          clearFilters={clearFilters}
+        />
       </div>
+
+      {/* Applications List */}
+      {applications.length === 0 ? (
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-8 text-center">
+          <BuildingOfficeIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No applications yet</h3>
+          <p className="text-gray-500 mb-4">Add your first application to get started!</p>
+          <button
+            onClick={handleAddNew}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            aria-label="Add your first application"
+          >
+            <PlusIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+            Add Your First Application
+          </button>
+        </div>
+      ) : filteredAndSortedApps.length === 0 ? (
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-8 text-center">
+          <MagnifyingGlassIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No applications match your filters</h3>
+          <p className="text-gray-500 mb-4">Try adjusting your search criteria or clear the filters.</p>
+          <button
+            onClick={clearFilters}
+            className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors focus:ring-2 focus:ring-gray-500 focus:outline-none"
+            aria-label="Clear all filters"
+          >
+            Clear Filters
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {filteredAndSortedApps.map((app) => (
+            <ApplicationCard
+              key={app.id}
+              app={app}
+              editApplication={editApplication}
+              deleteApplication={handleDeleteApplication}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default Applications; 
+export default Applications;

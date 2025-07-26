@@ -99,6 +99,10 @@ export const AppProvider = ({ children }) => {
           // verify token is still valid
           const userData = await apiService.getUserProfile();
           dispatch({ type: 'LOGIN_SUCCESS', payload: { user: userData.user } });
+          
+          // Fetch applications and achievements after successful auth check
+          await fetchApplications();
+          await fetchAchievements();
         } catch (error) {
           // Token is invalid, clear storage
           localStorage.removeItem('authToken');
@@ -188,6 +192,7 @@ export const AppProvider = ({ children }) => {
       addNotification('Application added successfully!', 'success');
       return response;
     } catch (error) {
+      console.log(error)
       addNotification('Failed to add application', 'error');
       throw error;
     }

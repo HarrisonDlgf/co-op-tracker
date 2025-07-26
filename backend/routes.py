@@ -1,28 +1,28 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from models import Application, User, Achievement, calculate_xp, get_level
 from database import db
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from achievements.achievements_utils import ACHIEVEMENTS
 import jwt
-import os
 
 app_routes = Blueprint('routes', __name__)
 
-# JWT configuration
-JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'your-secret-key-change-in-production')
+# rate limiting as to avoid brute force attacks
+def limiter():
+    return current_app.extensions['limiter']
 
 def create_jwt_token(user_id):
-    """Create a JWT token for the user"""
     payload = {
         'user_id': user_id,
-        'exp': datetime.utcnow() + timedelta(days=7),  # 7 days expiry
-        'iat': datetime.utcnow()
+        'exp': datetime.now(timezone.utc) + current_app.config['JWT_ACCESS_TOKEN_EXPIRES'],
+        'iat': datetime.now(timezone.utc)
     }
-    return jwt.encode(payload, JWT_SECRET_KEY, algorithm='HS256')
+    return jwt.encode(payload, current_app.config['JWT_SECRET_KEY'], algorithm='HS256')
 
 def verify_jwt_token(token):
     """Verify and decode JWT token"""
     try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+        payload = jwt.decode(token, current_app.config['JWT_SECRET_KEY'], algorithms=['HS256'])
         return payload['user_id']
     except jwt.ExpiredSignatureError:
         return None
@@ -75,7 +75,7 @@ def google_auth():
                 profile_picture=picture,
                 xp=0,
                 level=1,
-                joined=datetime.utcnow()
+                joined=datetime.now(timezone.utc)
             )
             db.session.add(user)
             db.session.commit()
@@ -124,52 +124,10 @@ def refresh_token():
 def check_and_award_achievements(user: User):
     '''Check if user qualifies for new achievements'''
     new_achievements = []
+    total_xp_gained = 0
     
     # Achievement definitions as of now
-    achievements_to_check = [
-        {
-            'name': 'First Steps',
-            'description': 'Apply to your first co-op of the cycle',
-            'icon': '🎯',
-            'condition': lambda u: len(u.applications) >= 1
-        },
-        {
-            'name': 'Getting There',
-            'description': 'Apply to 10 co-ops',
-            'icon': '💪',
-            'condition': lambda u: len(u.applications) >= 10
-        },
-        {
-            'name': 'Interview Prep Starts Now',
-            'description': 'Get your first interview',
-            'icon': '🎤',
-            'condition': lambda u: len([app for app in u.applications if app.status == 'Interviewing']) >= 1
-        },
-        {
-            'name': 'WE DID IT!',
-            'description': 'Receive your first offer',
-            'icon': '🏆',
-            'condition': lambda u: len([app for app in u.applications if app.status == 'Offer']) >= 1
-        },
-        {
-            'name': 'Getting Good At This',
-            'description': 'Reach level 2',
-            'icon': '⭐',
-            'condition': lambda u: u.level >= 2
-        },
-        {
-            'name': 'XP Hunter',
-            'description': 'Earn 500 total XP',
-            'icon': '🔥',
-            'condition': lambda u: u.xp >= 500
-        },
-        {
-            'name': '10 Levels of Co-Op Grind, Wow',
-            'description': 'Reach level 10',
-            'icon': '🔟',
-            'condition': lambda u: u.level >= 10
-        }
-    ]
+    achievements_to_check = ACHIEVEMENTS
     
     # Check each achievement
     for achievement_def in achievements_to_check:
@@ -185,11 +143,20 @@ def check_and_award_achievements(user: User):
             )
             db.session.add(new_achievement)
             new_achievements.append(new_achievement)
+            
+            # Award XP for unlocking achievement
+            xp_reward = achievement_def.get('xp_reward', 0)
+            if xp_reward > 0:
+                user.xp += xp_reward
+                total_xp_gained += xp_reward
     
-    if new_achievements:
+    if new_achievements or total_xp_gained > 0:
+        # Update user level if XP was gained
+        if total_xp_gained > 0:
+            user.level = get_level(user.xp)
         db.session.commit()
     
-    return new_achievements
+    return new_achievements, total_xp_gained
 
 @app_routes.route('/applications', methods=['GET'])
 def get_all_apps():
@@ -252,7 +219,7 @@ def add_app():
         db.session.commit()
     
     # Check for new achievements
-    new_achievements = check_and_award_achievements(current_user)
+    new_achievements, xp_from_achievements = check_and_award_achievements(current_user)
     
     return jsonify({
         'application': {
@@ -264,7 +231,7 @@ def add_app():
             'notes': new_app.notes,
             'created_at': new_app.created_at.isoformat()
         },
-        'xp_gained': xp_gained,
+        'xp_gained': xp_gained + xp_from_achievements,
         'new_achievements': [{'name': a.name, 'icon': a.icon} for a in new_achievements]
     })
 
@@ -317,7 +284,7 @@ def update_app(app_id):
                 db.session.commit()
     
     # Check for new achievements
-    new_achievements = check_and_award_achievements(current_user)
+    new_achievements, xp_from_achievements = check_and_award_achievements(current_user)
     
     return jsonify({
         'application': {
@@ -329,7 +296,7 @@ def update_app(app_id):
             'notes': app.notes,
             'created_at': app.created_at.isoformat()
         },
-        'xp_gained': xp_gained,
+        'xp_gained': xp_gained + xp_from_achievements,
         'new_achievements': [{'name': a.name, 'icon': a.icon} for a in new_achievements]
     })
 
@@ -379,6 +346,23 @@ def get_user_profile():
             'interview_rate': round(interview_rate, 1),
             'offer_rate': round(offer_rate, 1)
         }
+    })
+
+@app_routes.route('/achievements/check', methods=['POST'])
+def check_achievements():
+    """Manually check and award achievements for current user"""
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Check for new achievements
+    new_achievements, xp_gained = check_and_award_achievements(current_user)
+    
+    return jsonify({
+        'new_achievements': [{'name': a.name, 'icon': a.icon, 'xp_reward': ACHIEVEMENTS[next(i for i, ach in enumerate(ACHIEVEMENTS) if ach['name'] == a.name)]['xp_reward']} for a in new_achievements],
+        'xp_gained': xp_gained,
+        'total_xp': current_user.xp,
+        'level': current_user.level
     })
 
 @app_routes.route('/achievements', methods=['GET'])

@@ -1,6 +1,55 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { TrophyIcon, StarIcon, FireIcon } from '@heroicons/react/24/outline';
+import AchievementCard from '../components/AchievementCard';
+
+// XP rewards for each achievement
+const ACHIEVEMENT_XP_REWARDS = {
+  'First Steps': 25,
+  'Getting There': 50,
+  'Application Master': 100,
+  'Co-Op Grinder': 200,
+  'Interview Prep Starts Now': 75,
+  'Interview Pro': 150,
+  'WE DID IT!': 300,
+  'Offer Collector': 500,
+  'Getting Good At This': 50,
+  'Level Up!': 100,
+  '10 Levels of Co-Op Grind, Wow': 250,
+  'XP Hunter': 100,
+  'XP Master': 200,
+  'XP Legend': 500,
+  'Consistent Grinder': 150,
+  'Diverse Applications': 125,
+  'Rejection Resilience': 100,
+  'Quick Success': 400,
+  'High Interview Rate': 175,
+  'Perfect Streak': 600
+};
+
+// Achievement definitions for the frontend
+const ACHIEVEMENT_DEFINITIONS = [
+  { name: 'First Steps', description: 'Apply to your first co-op of the cycle', icon: '🎯' },
+  { name: 'Getting There', description: 'Apply to 10 co-ops', icon: '💪' },
+  { name: 'Application Master', description: 'Apply to 25 co-ops', icon: '📚' },
+  { name: 'Co-Op Grinder', description: 'Apply to 50 co-ops', icon: '🏃‍♂️' },
+  { name: 'Interview Prep Starts Now', description: 'Get your first interview', icon: '🎤' },
+  { name: 'Interview Pro', description: 'Get 5 interviews', icon: '🎭' },
+  { name: 'WE DID IT!', description: 'Receive your first offer', icon: '🏆' },
+  { name: 'Offer Collector', description: 'Receive 3 offers', icon: '💎' },
+  { name: 'Getting Good At This', description: 'Reach level 2', icon: '⭐' },
+  { name: 'Level Up!', description: 'Reach level 5', icon: '🌟' },
+  { name: '10 Levels of Co-Op Grind, Wow', description: 'Reach level 10', icon: '🔟' },
+  { name: 'XP Hunter', description: 'Earn 500 total XP', icon: '🔥' },
+  { name: 'XP Master', description: 'Earn 1000 total XP', icon: '⚡' },
+  { name: 'XP Legend', description: 'Earn 2000 total XP', icon: '👑' },
+  { name: 'Consistent Grinder', description: 'Apply to co-ops for 7 consecutive days', icon: '📅' },
+  { name: 'Diverse Applications', description: 'Apply to 10 different companies', icon: '🏢' },
+  { name: 'Rejection Resilience', description: 'Get rejected 10 times (but keep going!)', icon: '💪' },
+  { name: 'Quick Success', description: 'Get an offer within 5 applications', icon: '🚀' },
+  { name: 'High Interview Rate', description: 'Get interviews for 10% of your applications (min 4 apps)', icon: '📊' },
+  { name: 'Perfect Streak', description: 'Get 3 offers in a row', icon: '🎯' }
+];
 
 const Achievements = () => {
   const { achievements } = useApp();
@@ -27,7 +76,7 @@ const Achievements = () => {
             <div className="flex justify-center mb-2">
               <StarIcon className="h-8 w-8 text-blue-500" />
             </div>
-            <p className="text-2xl font-bold text-gray-900">7</p>
+            <p className="text-2xl font-bold text-gray-900">20</p>
             <p className="text-sm text-gray-600">Total Available</p>
           </div>
           <div className="text-center">
@@ -35,7 +84,7 @@ const Achievements = () => {
               <FireIcon className="h-8 w-8 text-orange-500" />
             </div>
             <p className="text-2xl font-bold text-gray-900">
-              {Math.round((achievements.length / 7) * 100)}%
+              {Math.round((achievements.length / 20) * 100)}%
             </p>
             <p className="text-sm text-gray-600">Completion Rate</p>
           </div>
@@ -44,173 +93,19 @@ const Achievements = () => {
 
       {/* Achievements Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* First Steps */}
-        <div className={`bg-white rounded-lg shadow p-6 border-2 ${
-          achievements.find(a => a.id === 1) ? 'border-green-200 bg-green-50' : 'border-gray-200'
-        }`}>
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-3xl">🎯</span>
-            {achievements.find(a => a.id === 1) && (
-              <TrophyIcon className="h-6 w-6 text-green-600" />
-            )}
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">First Steps</h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Apply to your first co-op of the cycle
-          </p>
-          {achievements.find(a => a.id === 1) ? (
-            <div className="flex items-center text-green-600 text-sm">
-              <TrophyIcon className="h-4 w-4 mr-1" />
-              Unlocked!
-            </div>
-          ) : (
-            <div className="text-gray-400 text-sm">Not yet unlocked</div>
-          )}
-        </div>
-
-        {/* Getting There */}
-        <div className={`bg-white rounded-lg shadow p-6 border-2 ${
-          achievements.find(a => a.id === 2) ? 'border-green-200 bg-green-50' : 'border-gray-200'
-        }`}>
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-3xl">💪</span>
-            {achievements.find(a => a.id === 2) && (
-              <TrophyIcon className="h-6 w-6 text-green-600" />
-            )}
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Getting There</h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Apply to 10 co-ops
-          </p>
-          {achievements.find(a => a.id === 2) ? (
-            <div className="flex items-center text-green-600 text-sm">
-              <TrophyIcon className="h-4 w-4 mr-1" />
-              Unlocked!
-            </div>
-          ) : (
-            <div className="text-gray-400 text-sm">Not yet unlocked</div>
-          )}
-        </div>
-
-        {/* Interview Prep Starts Now */}
-        <div className={`bg-white rounded-lg shadow p-6 border-2 ${
-          achievements.find(a => a.id === 3) ? 'border-green-200 bg-green-50' : 'border-gray-200'
-        }`}>
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-3xl">🎤</span>
-            {achievements.find(a => a.id === 3) && (
-              <TrophyIcon className="h-6 w-6 text-green-600" />
-            )}
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Interview Prep Starts Now</h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Get your first interview
-          </p>
-          {achievements.find(a => a.id === 3) ? (
-            <div className="flex items-center text-green-600 text-sm">
-              <TrophyIcon className="h-4 w-4 mr-1" />
-              Unlocked!
-            </div>
-          ) : (
-            <div className="text-gray-400 text-sm">Not yet unlocked</div>
-          )}
-        </div>
-
-        {/* WE DID IT! */}
-        <div className={`bg-white rounded-lg shadow p-6 border-2 ${
-          achievements.find(a => a.id === 4) ? 'border-green-200 bg-green-50' : 'border-gray-200'
-        }`}>
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-3xl">🏆</span>
-            {achievements.find(a => a.id === 4) && (
-              <TrophyIcon className="h-6 w-6 text-green-600" />
-            )}
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">WE DID IT!</h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Receive your first offer
-          </p>
-          {achievements.find(a => a.id === 4) ? (
-            <div className="flex items-center text-green-600 text-sm">
-              <TrophyIcon className="h-4 w-4 mr-1" />
-              Unlocked!
-            </div>
-          ) : (
-            <div className="text-gray-400 text-sm">Not yet unlocked</div>
-          )}
-        </div>
-
-        {/* Getting Good At This */}
-        <div className={`bg-white rounded-lg shadow p-6 border-2 ${
-          achievements.find(a => a.id === 5) ? 'border-green-200 bg-green-50' : 'border-gray-200'
-        }`}>
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-3xl">⭐</span>
-            {achievements.find(a => a.id === 5) && (
-              <TrophyIcon className="h-6 w-6 text-green-600" />
-            )}
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Getting Good At This</h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Reach level 2
-          </p>
-          {achievements.find(a => a.id === 5) ? (
-            <div className="flex items-center text-green-600 text-sm">
-              <TrophyIcon className="h-4 w-4 mr-1" />
-              Unlocked!
-            </div>
-          ) : (
-            <div className="text-gray-400 text-sm">Not yet unlocked</div>
-          )}
-        </div>
-
-        {/* XP Hunter */}
-        <div className={`bg-white rounded-lg shadow p-6 border-2 ${
-          achievements.find(a => a.id === 6) ? 'border-green-200 bg-green-50' : 'border-gray-200'
-        }`}>
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-3xl">🔥</span>
-            {achievements.find(a => a.id === 6) && (
-              <TrophyIcon className="h-6 w-6 text-green-600" />
-            )}
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">XP Hunter</h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Earn 500 total XP
-          </p>
-          {achievements.find(a => a.id === 6) ? (
-            <div className="flex items-center text-green-600 text-sm">
-              <TrophyIcon className="h-4 w-4 mr-1" />
-              Unlocked!
-            </div>
-          ) : (
-            <div className="text-gray-400 text-sm">Not yet unlocked</div>
-          )}
-        </div>
-
-        {/* 10 Levels of Co-Op Grind, Wow */}
-        <div className={`bg-white rounded-lg shadow p-6 border-2 ${
-          achievements.find(a => a.id === 7) ? 'border-green-200 bg-green-50' : 'border-gray-200'
-        }`}>
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-3xl">🔟</span>
-            {achievements.find(a => a.id === 7) && (
-              <TrophyIcon className="h-6 w-6 text-green-600" />
-            )}
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">10 Levels of Co-Op Grind, Wow</h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Reach level 10
-          </p>
-          {achievements.find(a => a.id === 7) ? (
-            <div className="flex items-center text-green-600 text-sm">
-              <TrophyIcon className="h-4 w-4 mr-1" />
-              Unlocked!
-            </div>
-          ) : (
-            <div className="text-gray-400 text-sm">Not yet unlocked</div>
-          )}
-        </div>
+        {ACHIEVEMENT_DEFINITIONS.map((achievementDef) => {
+          const isUnlocked = achievements.find(a => a.name === achievementDef.name);
+          const xpReward = ACHIEVEMENT_XP_REWARDS[achievementDef.name];
+          
+          return (
+            <AchievementCard
+              key={achievementDef.name}
+              achievement={achievementDef}
+              isUnlocked={!!isUnlocked}
+              xpReward={xpReward}
+            />
+          );
+        })}
       </div>
 
       {/* Motivation Message */}
