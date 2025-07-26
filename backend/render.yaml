@@ -16,7 +16,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: CORS_ORIGINS
-        value: https://your-frontend.vercel.app
+        value: https://co-op-tracker-orcin.vercel.app
     buildFilter:
       paths:
         - backend/**
