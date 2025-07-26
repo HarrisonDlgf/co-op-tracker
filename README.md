@@ -21,59 +21,151 @@ Co-Op Tracker Pro isn’t just to be a spreadsheet but to be a platform for all.
 
 | Layer        | Technology              | Purpose                                  |
 |--------------|--------------------------|------------------------------------------|
-| **Frontend** | React (Tailwind/Bootstrap) | UI/UX for dashboard, forms, social feed  |
-| **Backend**  | Flask                    | REST API, XP logic, achievement engine   |
-| **Database** | SQLAlchemy               | Persist users, apps, offers, achievements |
-| **Auth** (PLANNED)     | Firebase Auth (planned)  | Northeastern email login & user sessions |
-| **Hosting** (PLANNED) | (planned) Vercel (frontend), Render/Fly.io (backend) | Full deployment |
+| **Frontend** | React + Tailwind CSS    | UI/UX for dashboard, forms, social feed  |
+| **Backend**  | Flask + SQLAlchemy      | REST API, XP logic, achievement engine   |
+| **Database** | SQLite (dev) / PostgreSQL (prod) | Persist users, apps, offers, achievements |
+| **Auth**     | Google OAuth + JWT      | Northeastern email login & user sessions |
+| **Charts**   | Chart.js + react-chartjs-2 | Data visualization and analytics |
+| **Hosting** (PLANNED) | Vercel (frontend), Railway (backend) | Full deployment |
 
 ---
 
 ## Features
 
-### ✅ MVP for Backend (Completed)
-- 🔁 Application logging with:
-  - Company, role, status, wage, hybrid type
-  - Cover letter, benefits (optional)
-- 🧠 XP system with per-status rewards:
-  - +10 for Applied, +20 for Interviewing, +50 for Offer
-- 🧗 Leveling system: Level up every 100 XP
-- 🏅 Achievement engine:
-  - Achievements given based on criteria being met in a user's profile
-- 📊 User profile:
-  - Interview rate, offer rate, total XP, level, achievements
-  - Models created and connected to a DB
+### ✅ **Completed Features**
 
-### 🧪 In Progress
-- 🔐 Firebase email auth (NEU only)
-- 🧾 SQLite persistence with SQLAlchemy
-- 🎨 React frontend MVP
-  - Dashboard (XP bar, stats)
-  - Application table + form
-  - Achievement cards
+#### **🔐 Authentication System**
+- Google OAuth integration with Northeastern email validation
+- JWT token-based session management
+- Secure user authentication and authorization
+- Automatic token refresh and session handling
 
-### 🔮 Planned
-- Offer Feed:
-  - Public posts for accepted co-ops (role, pay, emoji, story)
--  Leaderboard:
-  - Top XP earners across NEU
-- 💌 Bonus XP:
-  - Add resume, write a cover letter, and more for leveling up
-- Cycle Tracker:
-  - View stats per cycle (Spring/Summer/Fall)
-- 📥 CSV export/import
-- 🎖 Badge collection
-- 💬 Comments + upvotes on offers
+#### **📊 Dashboard & Analytics**
+- **XP Progress System**: Visual progress bar with level tracking
+- **Application Status Pie Chart**: Interactive chart showing status breakdown
+- **Statistics Cards**: Total applications, interviews, offers, achievements
+- **Recent Applications**: Quick view of latest applications
+- **Responsive Design**: Works on desktop, tablet, and mobile
+
+#### **📝 Application Management**
+- **Comprehensive Application Form**: Company, role, status, salary, notes
+- **Application Table**: Sortable, filterable list of all applications
+- **Status Tracking**: Applied, Interviewing, Offer, Rejected, Ghosted, Withdrawn
+- **Edit & Update**: Modify application details and status
+- **Search & Filter**: Find applications by company, status, or date
+
+#### **🏆 Achievement System**
+- **Dynamic Achievement Engine**: Unlock achievements based on user actions
+- **Achievement Cards**: Visual display of earned and unearned achievements
+- **Progress Tracking**: See progress towards unlocking achievements
+- **XP Rewards**: Earn XP for completing achievements
+
+#### **🎮 Gamification**
+- **XP System**: Earn XP for applications, interviews, and offers
+- **Leveling System**: Level up every 100 XP with visual progress
+- **Achievement Unlocking**: Complete milestones to unlock achievements
+- **Progress Visualization**: See your growth over time
+
+#### **🎨 User Experience**
+- **Modern UI/UX**: Clean, intuitive interface with Tailwind CSS
+- **Custom Favicon**: Branded browser tab icon
+- **Loading States**: Smooth loading animations
+- **Error Handling**: User-friendly error messages
+- **Notifications**: Toast notifications for user feedback
+
+### 🧪 **In Progress**
+- **Offer Feed**: Public posts for accepted co-ops (role, pay, story)
+- **Leaderboard**: Top XP earners across NEU
+- **Enhanced XP System**: Bonus XP for resume uploads, cover letters
+
+### 🔮 **Planned Features**
+- **Community Features**: Comments and upvotes on offers
+- **Cycle Tracker**: View stats per cycle (Spring/Summer/Fall)
+- **CSV Export/Import**: Data portability
+- **Badge Collection**: Visual achievement badges
+- **Pay Transparency**: Detailed salary insights and comparisons
 
 ---
 
-## 🧠 Who This Is For
+## 🚀 **Quick Start**
 
-- 🧑‍🎓 Northeastern students applying for co-ops  
-- 🧑‍💻 Students who want structure and momentum in their application process  
-- 💸 Students who want pay transparency and offer insight before they commit
+### **Prerequisites**
+- Node.js (v16+)
+- Python (v3.8+)
+- Google OAuth credentials
+
+### **Backend Setup**
+```bash
+cd backend
+pip install -r requirements.txt
+python app.py
+```
+
+### **Frontend Setup**
+```bash
+cd frontend
+npm install
+npm start
+```
+
+### **Environment Variables**
+Create `.env` files in both `backend/` and `frontend/` directories:
+
+**Backend (.env):**
+```env
+FLASK_ENV=development
+SECRET_KEY=your-secret-key
+JWT_SECRET_KEY=your-jwt-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+```
+
+**Frontend (.env):**
+```env
+REACT_APP_GOOGLE_CLIENT_ID=your-google-client-id
+REACT_APP_API_URL=http://localhost:5001
+```
 
 ---
+
+## 📊 **Current Progress**
+
+### **✅ MVP Complete (100%)**
+- [x] User authentication with Google OAuth
+- [x] Application tracking and management
+- [x] XP and leveling system
+- [x] Achievement system
+- [x] Dashboard with analytics
+- [x] Responsive UI/UX
+- [x] Database integration
+- [x] API endpoints
+
+### **🔄 Next Phase (In Progress)**
+- [ ] Offer Feed implementation
+- [ ] Leaderboard system
+- [ ] Enhanced social features
+- [ ] Production deployment
+
+---
+
+## 🧠 **Who This Is For**
+
+- 🧑‍🎓 **Northeastern students** applying for co-ops  
+- 🧑‍💻 **Students who want structure** and momentum in their application process  
+- 💸 **Students who want pay transparency** and offer insight before they commit
+- 🎮 **Students who enjoy gamification** and tracking progress
+
+---
+
+## 🤝 **Contributing**
 
 If you would like to contribute or fork this repository, please reach out beforehand. 
-Thanks, Harrison Dolgoff
+
+**Current Focus Areas:**
+- Offer Feed development
+- Leaderboard implementation
+- Production deployment
+- Performance optimization
+
+---
+
+**Thanks, Harrison Dolgoff** 🚀
