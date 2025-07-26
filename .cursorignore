@@ -1,0 +1,28 @@
+# Node.js
+node_modules/
+package-lock.json
+build/
+.env*
+
+# Python
+__pycache__/
+*.pyc
+instance/
+.pytest_cache/
+*.db
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp 

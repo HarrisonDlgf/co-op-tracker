@@ -1,0 +1,27 @@
+{
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/instance": true,
+    "**/.pytest_cache": true,
+    "**/package-lock.json": true,
+    "**/.DS_Store": true,
+    "**/*.log": true,
+    "**/build": true,
+    "**/.env*": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/__pycache__": true,
+    "**/instance": true,
+    "**/.pytest_cache": true,
+    "**/build": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/__pycache__/**": true,
+    "**/instance/**": true,
+    "**/.pytest_cache/**": true
+  }
+} 
