@@ -17,6 +17,10 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: https://co-op-tracker-orcin.vercel.app
+      - key: DATABASE_URL
+        fromDatabase:
+          name: coop-tracker-db
+          property: connectionString
     buildFilter:
       paths:
         - backend/**
