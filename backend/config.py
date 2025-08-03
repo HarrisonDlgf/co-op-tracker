@@ -6,10 +6,25 @@ class Config:
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key-change-in-production'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
     
-    # Database
+    # Database Configuration
     DATABASE_URL = os.environ.get('DATABASE_URL') or 'sqlite:///instance/coop_tracker.db'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///instance/coop_tracker.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # config for ssl connection for prod 
+    if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+        SQLALCHEMY_DATABASE_URI = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+        
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'pool_pre_ping': True,        
+            'pool_recycle': 300,         
+            'max_overflow': 20,           
+            'connect_args': {
+                'sslmode': 'require',     
+                'connect_timeout': 10,    
+                'application_name': 'coop-tracker'  # Identify your app in logs
+            }
+        }
     
     # CORS
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3000,https://co-op-tracker-orcin.vercel.app').split(',')

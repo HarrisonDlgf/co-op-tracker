@@ -16,9 +16,14 @@ def create_app(config_name=None):
     config_name = config_name or os.environ.get('FLASK_ENV', 'development')
     app.config.from_object(config[config_name])
     
-    # Override database URL to ensure PostgreSQL is used
+    # SSL for PostgreSQL on Render
     if os.environ.get('DATABASE_URL'):
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+        
+        # if in sqlalchemy engine options, apply the ssl configuration
+        if hasattr(config[config_name], 'SQLALCHEMY_ENGINE_OPTIONS'):
+            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = config[config_name].SQLALCHEMY_ENGINE_OPTIONS
+            print("SSL configuration applied for PostgreSQL") # debugging message
     
     # Initialize extensions
     db.init_app(app)
