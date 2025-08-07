@@ -27,8 +27,14 @@ const Leaderboard = () => {
       setError(null);
       
       const data = await apiService.getLeaderboard();
-      setLeaderboardData(data);
-      setLastFetchTime(new Date());
+      
+      if (data && (data.xp_leaderboard || data.achievements_leaderboard)) {
+        setLeaderboardData(data);
+        setLastFetchTime(new Date());
+        setError(null); 
+      } else {
+        throw new Error('Invalid data received from server');
+      }
       
     } catch (err) {
       console.error('Failed to fetch leaderboard:', err);
@@ -64,8 +70,7 @@ const Leaderboard = () => {
         </div>
       </div>
 
-        {/* Error Message */}
-        {error && (
+        {error && (!leaderboardData.xp_leaderboard.length && !leaderboardData.achievements_leaderboard.length) && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-center space-x-2">
               <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
