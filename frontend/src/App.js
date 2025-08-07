@@ -7,16 +7,17 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Applications from './pages/Applications';
 import Achievements from './pages/Achievements';
-import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
-import NotificationToast from './components/NotificationToast';
+import Layout from './components/layout/Layout';
+import ProtectedRoute from './components/ui/ProtectedRoute';
+import NotificationToast from './components/ui/NotificationToast';
 import { GOOGLE_CLIENT_ID } from './config/googleAuth';
+import Leaderboard from './pages/Leaderboard';
 
 const NotificationContainer = () => {
   const { notifications, removeNotification } = useApp();
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed top-4 right-4 z-[9999] space-y-2">
       {notifications.map((notification) => (
         <NotificationToast
           key={notification.id}
@@ -56,6 +57,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Layout><Achievements /></Layout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/leaderboard" 
+          element={
+            <ProtectedRoute>
+              <Layout><Leaderboard /></Layout>
             </ProtectedRoute>
           } 
         />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import StatusPieChart from '../components/StatusPieChart';
+import StatusPieChart from '../components/dashboard/StatusPieChart';
 import { 
   PlusIcon, 
   DocumentTextIcon, 

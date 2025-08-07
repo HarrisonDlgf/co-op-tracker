@@ -404,7 +404,7 @@ def check_achievements():
 
 @app_routes.route('/achievements/revoke', methods=['POST'])
 def revoke_achievements():
-    """Manually check and revoke achievements for current user"""
+    # remove achievements for current user
     current_user = get_current_user()
     if not current_user:
         return jsonify({'error': 'User not found'}), 404
@@ -419,9 +419,53 @@ def revoke_achievements():
         'level': current_user.level
     })
 
+@app_routes.route('/leaderboard', methods=['GET'])
+def get_leaderboard():
+    # get leaderboard data
+    try:
+        xp_leaderboard = User.query.order_by(User.xp.desc()).limit(25).all()
+        
+        achievements_leaderboard = db.session.query(User, db.func.count(Achievement.id).label('achievement_count')).join(Achievement, User.id == Achievement.user_id).group_by(User.id).order_by(db.func.count(Achievement.id).desc()).limit(25).all()
+        
+        # format XP leaderboard
+        xp_rankings = []
+        for i, user in enumerate(xp_leaderboard, 1):
+            xp_rankings.append({
+                'rank': i,
+                'user_id': user.id,
+                'name': user.name,
+                'profile_picture': user.profile_picture,
+                'xp': user.xp,
+                'level': user.level,
+                'achievement_count': len(user.achievements)
+            })
+        
+        # Format achievements leaderboard
+        achievement_rankings = []
+        for i, (user, achievement_count) in enumerate(achievements_leaderboard, 1):
+            achievement_rankings.append({
+                'rank': i,
+                'user_id': user.id,
+                'name': user.name,
+                'profile_picture': user.profile_picture,
+                'xp': user.xp,
+                'level': user.level,
+                'achievement_count': achievement_count
+            })
+        
+        return jsonify({
+            'xp_leaderboard': xp_rankings,
+            'achievements_leaderboard': achievement_rankings,
+            'last_updated': datetime.now(timezone.utc).isoformat()
+        })
+        
+    except Exception as e:
+        print(f"Leaderboard error: {e}")
+        return jsonify({'error': 'Failed to fetch leaderboard'}), 500
+
 @app_routes.route('/health', methods=['GET'])
 def health_check():
-    """Health check endpoint for deployment monitoring"""
+    # health check endpoint for deployment monitoring
     return jsonify({
         'status': 'healthy',
         'message': 'Co-op Tracker API is running',

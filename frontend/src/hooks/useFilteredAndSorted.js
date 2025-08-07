@@ -2,24 +2,23 @@ import { useMemo } from 'react';
 
 const useFilteredAndSorted = (applications, filters, sortBy, sortOrder) => {
   return useMemo(() => {
-    // Filter applications
     let filtered = applications.filter(app => {
       // Status filter
       if (filters.status !== 'all' && app.status !== filters.status) {
         return false;
       }
       
-      // Company filter
+      // company filter
       if (filters.company && !app.company.toLowerCase().includes(filters.company.toLowerCase())) {
         return false;
       }
       
-      // Position filter
+      // position filter
       if (filters.position && !app.position.toLowerCase().includes(filters.position.toLowerCase())) {
         return false;
       }
       
-      // Date range filter
+      // date range filter
       if (filters.dateFrom && app.applied_date) {
         const appDate = new Date(app.applied_date);
         const fromDate = new Date(filters.dateFrom);
@@ -35,7 +34,7 @@ const useFilteredAndSorted = (applications, filters, sortBy, sortOrder) => {
       return true;
     });
 
-    // Sort applications
+    // sort applications
     filtered.sort((a, b) => {
       let aValue, bValue;
       
