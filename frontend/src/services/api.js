@@ -94,6 +94,11 @@ class ApiService {
   async getAchievements() {
     return this.request('/achievements');
   }
+
+  // leaderboard endpoints
+  async getLeaderboard() {
+    return this.request('/leaderboard');
+  }
 }
 
 export const apiService = new ApiService();

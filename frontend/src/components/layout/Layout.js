@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
-import Logo from './Logo';
+import { useApp } from '../../context/AppContext';
+import Logo from '../ui/Logo';
 import { 
   HomeIcon, 
   DocumentTextIcon, 
   TrophyIcon, 
+  ChartBarIcon,
   UserCircleIcon,
   ChevronDownIcon,
   ArrowRightStartOnRectangleIcon
@@ -21,6 +22,7 @@ const Layout = ({ children }) => {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Applications', href: '/applications', icon: DocumentTextIcon },
     { name: 'Achievements', href: '/achievements', icon: TrophyIcon },
+    { name: 'Leaderboard', href: '/leaderboard', icon: ChartBarIcon },
   ];
 
   const handleLogout = async () => {

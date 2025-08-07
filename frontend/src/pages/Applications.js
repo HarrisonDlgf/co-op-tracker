@@ -4,11 +4,11 @@ import { useApp } from '../context/AppContext';
 import { PlusIcon, BuildingOfficeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 // Import components
-import StatsCards from '../components/StatsCards';
-import FilterPanel from '../components/FilterPanel';
-import SortControls from '../components/SortControls';
-import ApplicationCard from '../components/ApplicationCard';
-import ApplicationForm from '../components/ApplicationForm';
+import StatsCards from '../components/dashboard/StatsCards';
+import FilterPanel from '../components/applications/FilterPanel';
+import SortControls from '../components/applications/SortControls';
+import ApplicationCard from '../components/applications/ApplicationCard';
+import ApplicationForm from '../components/applications/ApplicationForm';
 
 // Import custom hook
 import useFilteredAndSorted from '../hooks/useFilteredAndSorted';

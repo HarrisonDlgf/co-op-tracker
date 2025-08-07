@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { TrophyIcon, StarIcon, FireIcon } from '@heroicons/react/24/outline';
-import AchievementCard from '../components/AchievementCard';
+import AchievementCard from '../components/achievements/AchievementCard';
 
 // XP rewards for each achievement
 const ACHIEVEMENT_XP_REWARDS = {
