@@ -61,6 +61,25 @@ Co-Op Tracker Pro isn’t just to be a spreadsheet but to be a platform for all.
 - **Progress Tracking**: See progress towards unlocking achievements
 - **XP Rewards**: Earn XP for completing achievements
 
+#### **🥇 Leaderboard**: 
+- **Dual Competition**: XP leaderboard and achievements leaderboard with top 25 rankings
+- **Real-time Updates**: Live leaderboard with automatic refresh and last updated timestamps
+- **Visual Recognition**: Trophy icons and special colors for top 3 positions (🥇 Gold, 🥈 Silver, 🥉 Bronze)
+- **Personal Highlighting**: Current user's position highlighted with blue border and "You" badge
+- **Profile Integration**: Shows user profile pictures, names, levels, and achievement counts
+- **Competitive Analytics**: Displays XP totals, levels, and achievement counts for each competitor
+
+
+#### 📥 Bulk Import System**
+- **Multi-Format Support**: Import applications from CSV, Excel (.xlsx/.xls), and JSON files
+- **Smart Data Processing**: Automatic status mapping and flexible date parsing for common formats
+- **Duplicate Detection**: Prevents importing duplicate applications based on company, position, and date
+- **Flexible Date Formats**: Supports multiple date formats (YYYY-MM-DD, MM/DD/YYYY, MM-DD-YYYY, etc.)
+- **XP Integration**: Automatically awards XP for imported applications based on status
+- **Template System**: Downloadable CSV template with sample data for easy formatting
+- **Batch Processing**: Import hundreds of applications at once with progress tracking
+- **Data Validation**: Required fields validation with helpful error messages for missing data
+
 #### **🎮 Gamification**
 - **XP System**: Earn XP for applications, interviews, and offers
 - **Leveling System**: Level up every 100 XP with visual progress
@@ -76,13 +95,11 @@ Co-Op Tracker Pro isn’t just to be a spreadsheet but to be a platform for all.
 
 ### 🧪 **In Progress**
 - **Offer Feed**: Public posts for accepted co-ops (role, pay, story)
-- **Leaderboard**: Top XP earners across NEU
 - **Enhanced XP System**: Bonus XP for resume uploads, cover letters
 
 ### 🔮 **Planned Features**
 - **Community Features**: Comments and upvotes on offers
 - **Cycle Tracker**: View stats per cycle (Spring/Summer/Fall)
-- **CSV Export/Import**: Data portability
 - **Badge Collection**: Visual achievement badges
 - **Pay Transparency**: Detailed salary insights and comparisons
 
@@ -140,12 +157,12 @@ REACT_APP_API_URL=http://localhost:5001
 - [x] Responsive UI/UX
 - [x] Database integration
 - [x] API endpoints
+- [x] Leaderboard system
+- [x] Production deployment
 
 ### **🔄 Next Phase (In Progress)**
 - [ ] Offer Feed implementation
-- [ ] Leaderboard system
 - [ ] Enhanced social features
-- [ ] Production deployment
 
 ---
 
