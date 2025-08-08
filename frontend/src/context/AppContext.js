@@ -221,6 +221,18 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const clearAllApplications = async () => {
+    try {
+      const response = await apiService.clearAllApplications();
+      dispatch({ type: 'SET_APPLICATIONS', payload: [] });
+      addNotification(response.message, 'success');
+      return response;
+    } catch (error) {
+      addNotification('Failed to clear applications', 'error');
+      throw error;
+    }
+  };
+
   const addNotification = (message, type = 'info') => {
     const id = Date.now();
     const notification = { id, message, type };
@@ -246,6 +258,7 @@ export const AppProvider = ({ children }) => {
     addApplication,
     updateApplication,
     deleteApplication,
+    clearAllApplications,
     addNotification,
     removeNotification,
   };

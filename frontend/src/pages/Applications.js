@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { PlusIcon, BuildingOfficeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, BuildingOfficeIcon, MagnifyingGlassIcon, ArrowUpTrayIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 // Import components
 import StatsCards from '../components/dashboard/StatsCards';
@@ -9,12 +9,13 @@ import FilterPanel from '../components/applications/FilterPanel';
 import SortControls from '../components/applications/SortControls';
 import ApplicationCard from '../components/applications/ApplicationCard';
 import ApplicationForm from '../components/applications/ApplicationForm';
+import BulkImportModal from '../components/applications/BulkImportModal';
 
 // Import custom hook
 import useFilteredAndSorted from '../hooks/useFilteredAndSorted';
 
 const Applications = () => {
-  const { applications, addApplication, updateApplication, deleteApplication } = useApp();
+  const { applications, addApplication, updateApplication, deleteApplication, fetchApplications, clearAllApplications } = useApp();
   const location = useLocation();
   
   // State management
@@ -22,6 +23,7 @@ const Applications = () => {
   const [editingApp, setEditingApp] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
 
   // Filter state
   const [filters, setFilters] = useState({
@@ -100,6 +102,7 @@ const Applications = () => {
   const editApplication = useCallback((app) => {
     setEditingApp(app);
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const clearFilters = useCallback(() => {
@@ -117,6 +120,34 @@ const Applications = () => {
     setEditingApp(null);
   }, []);
 
+  const handleBulkImport = useCallback(() => {
+    setShowBulkImport(true);
+  }, []);
+
+  const handleImportComplete = useCallback((result) => {
+    fetchApplications();
+    console.log('Import completed:', result);
+  }, [fetchApplications]);
+
+  const handleClearAll = useCallback(async () => {
+    const confirmed = window.confirm(
+      '⚠️ WARNING: This will permanently delete ALL your applications!\n\n' +
+      'This action cannot be undone. You will lose:\n' +
+      '• All application data\n' +
+      '• Associated XP and achievements\n' +
+      '• Application history\n\n' +
+      'Are you absolutely sure you want to continue?'
+    );
+    
+    if (confirmed) {
+      try {
+        await clearAllApplications();
+      } catch (error) {
+        console.error('Error clearing applications:', error);
+      }
+    }
+  }, [clearAllApplications]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -125,14 +156,34 @@ const Applications = () => {
           <h1 className="text-3xl font-bold text-gray-900">Applications</h1>
           <p className="text-gray-600 mt-1">Track your co-op applications and progress</p>
         </div>
-        <button
-          onClick={handleAddNew}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          aria-label="Add new application"
-        >
-          <PlusIcon className="h-5 w-5 mr-2" aria-hidden="true" />
-          Add Application
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={handleBulkImport}
+            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
+            aria-label="Bulk import applications"
+          >
+            <ArrowUpTrayIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+            Import from File
+          </button>
+          <button
+            onClick={handleAddNew}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            aria-label="Add new application"
+          >
+            <PlusIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+            Add Application
+          </button>
+          {applications.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+              aria-label="Clear all applications"
+            >
+              <TrashIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+              Clear All
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -147,6 +198,12 @@ const Applications = () => {
           isSubmitting={isSubmitting}
         />
       )}
+
+      <BulkImportModal
+        isOpen={showBulkImport}
+        onClose={() => setShowBulkImport(false)}
+        onImportComplete={handleImportComplete}
+      />
 
       {/* Filters and Sort */}
       <div className="bg-white rounded-lg shadow border border-gray-200">
@@ -193,14 +250,24 @@ const Applications = () => {
           <BuildingOfficeIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No applications yet</h3>
           <p className="text-gray-500 mb-4">Add your first application to get started!</p>
-          <button
-            onClick={handleAddNew}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            aria-label="Add your first application"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" aria-hidden="true" />
-            Add Your First Application
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={handleAddNew}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              aria-label="Add your first application"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+              Add Your First Application
+            </button>
+            <button
+              onClick={handleBulkImport}
+              className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-500 focus:outline-none"
+              aria-label="Bulk import applications"
+            >
+              <ArrowUpTrayIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+              Bulk Import
+            </button>
+          </div>
         </div>
       ) : filteredAndSortedApps.length === 0 ? (
         <div className="bg-white rounded-lg shadow border border-gray-200 p-8 text-center">

@@ -3,6 +3,7 @@ from models import Application, User, Achievement, calculate_xp, get_level
 from database import db
 from datetime import datetime, timedelta, timezone
 from achievements.achievements_utils import ACHIEVEMENTS
+from bulk_import import ApplicationImporter, get_import_template
 import jwt
 
 app_routes = Blueprint('routes', __name__)
@@ -491,4 +492,163 @@ def get_achievements():
             for achievement in current_user.achievements
         ]
     })
+
+@app_routes.route('/applications/bulk-import', methods=['POST'])
+def bulk_import_applications():
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'error': 'User not found'}), 404
     
+    try:
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({'error': 'No file selected'}), 400
+            
+            # adding file validation for 10mb size limit
+            file.seek(0, 2)  
+            file_size = file.tell()
+            file.seek(0) 
+            
+            if file_size > 10 * 1024 * 1024:
+                return jsonify({'error': 'File too large. Maximum size is 10MB'}), 400
+            
+            filename = file.filename.lower()
+            importer = ApplicationImporter(current_user.id)
+            
+            if filename.endswith('.csv'):
+                csv_content = file.read().decode('utf-8')
+                result = importer.import_from_csv(csv_content)
+            elif filename.endswith(('.xlsx', '.xls')):
+                excel_content = file.read()
+                result = importer.import_from_excel(excel_content)
+            else:
+                return jsonify({'error': 'Unsupported file type. Please use CSV or Excel files'}), 400
+        elif request.is_json:
+            data = request.get_json()
+            applications = data.get('applications', [])
+            
+            if not applications:
+                return jsonify({'error': 'No applications provided'}), 400
+            
+            if len(applications) > 1000:
+                return jsonify({'error': 'Too many applications. Maximum is 1000'}), 400
+            
+            importer = ApplicationImporter(current_user.id)
+            result = importer.import_from_json(applications)
+        
+        else:
+            return jsonify({'error': 'No file or JSON data provided'}), 400
+        
+        # Always commit if there are successful imports
+        if result.successful_imports:
+            db.session.commit()
+            
+            if result.total_xp_gained > 0:
+                current_user.xp += result.total_xp_gained
+                current_user.level = get_level(current_user.xp)
+                db.session.commit()
+            
+            new_achievements, xp_from_achievements = check_and_award_achievements(current_user)
+            
+            if xp_from_achievements > 0:
+                result.total_xp_gained += xp_from_achievements
+        else:
+            db.session.rollback()
+        
+        # Always return 200 with detailed results
+        response_data = result.to_dict()
+        if result.successful_imports:
+            response_data['new_achievements'] = [{'name': a.name, 'icon': a.icon} for a in new_achievements]
+        
+        return jsonify(response_data)
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Import failed: {str(e)}'}), 500
+
+@app_routes.route('/applications/import-template', methods=['GET'])
+def get_import_template_route():
+    return jsonify(get_import_template())
+
+@app_routes.route('/applications/export', methods=['GET'])
+def export_applications():
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    try:
+        import pandas as pd
+        from io import StringIO
+        
+        applications = current_user.applications
+        
+        data = []
+        for app in applications:
+            data.append({
+                'company': app.company,
+                'position': app.position,
+                'status': app.status,
+                'applied_date': app.applied_date.strftime('%Y-%m-%d') if app.applied_date else '',
+                'notes': app.notes or '',
+                'created_at': app.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            })
+        
+        df = pd.DataFrame(data)
+        
+        output = StringIO()
+        df.to_csv(output, index=False)
+        csv_content = output.getvalue()
+        output.close()
+        
+        return jsonify({
+            'csv_content': csv_content,
+            'filename': f'applications_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Export failed: {str(e)}'}), 500
+
+@app_routes.route('/applications/sample-template', methods=['GET'])
+def get_sample_template():
+    try:
+        with open('sample_import_template.csv', 'r') as f:
+            csv_content = f.read()
+        
+        return jsonify({
+            'csv_content': csv_content,
+            'filename': 'sample_import_template.csv'
+        })
+    except Exception as e:
+        return jsonify({'error': f'Failed to load template: {str(e)}'}), 500
+
+@app_routes.route('/applications/clear-all', methods=['DELETE'])
+def clear_all_applications():
+    """Clear all applications for the current user"""
+    current_user = get_current_user()
+    if not current_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    try:
+        # Get count before deletion for response
+        application_count = len(current_user.applications)
+        
+        # Delete all applications
+        for app in current_user.applications:
+            db.session.delete(app)
+        
+        db.session.commit()
+        
+        # Check for revoked achievements
+        revoked_achievements, xp_lost = check_and_revoke_achievements(current_user)
+        
+        return jsonify({
+            'message': f'Successfully deleted {application_count} applications',
+            'deleted_count': application_count,
+            'revoked_achievements': [{'name': a.name, 'icon': a.icon} for a in revoked_achievements],
+            'xp_lost': xp_lost
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to clear applications: {str(e)}'}), 500
