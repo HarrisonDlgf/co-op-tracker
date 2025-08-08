@@ -341,7 +341,16 @@ def delete_app(app_id):
     if not app:
         return jsonify({'error': 'Application not found'}), 404
     
+    # Calculate XP to subtract based on the application's status
+    xp_to_subtract = calculate_xp(app.status)
+    
+    # Delete the application
     db.session.delete(app)
+    
+    # Subtract XP from user's total
+    current_user.xp -= xp_to_subtract
+    current_user.level = get_level(current_user.xp)
+    
     db.session.commit()
     
     # Revoke achievements if user no longer qualifies
@@ -349,8 +358,11 @@ def delete_app(app_id):
     
     return jsonify({
         'message': 'Application deleted successfully',
+        'xp_subtracted': xp_to_subtract,
         'revoked_achievements': [{'name': a.name, 'icon': a.icon} for a in revoked_achievements],
-        'xp_lost': xp_lost
+        'xp_lost': xp_lost,
+        'new_xp': current_user.xp,
+        'new_level': current_user.level
     })
 
 @app_routes.route('/user/profile', methods=['GET'])
@@ -639,14 +651,20 @@ def clear_all_applications():
         
         db.session.commit()
         
-        # Check for revoked achievements
+        current_user.xp = 0
+        current_user.level = get_level(current_user.xp)
+        db.session.commit()
+        
+        # Check for revoked achievements 
         revoked_achievements, xp_lost = check_and_revoke_achievements(current_user)
         
         return jsonify({
             'message': f'Successfully deleted {application_count} applications',
             'deleted_count': application_count,
             'revoked_achievements': [{'name': a.name, 'icon': a.icon} for a in revoked_achievements],
-            'xp_lost': xp_lost
+            'xp_lost': xp_lost,
+            'new_xp': current_user.xp,
+            'new_level': current_user.level
         })
         
     except Exception as e:
