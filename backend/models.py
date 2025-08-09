@@ -61,6 +61,18 @@ def calculate_xp(status: str) -> int:
     return xp_map.get(status, 0)
 
 def get_level(xp: int) -> int:
-    #Calculate level based on xp
     #TODO: make the levels harder as the users progress
-    return (xp // 100) + 1 
+    xp = max(0, xp)
+    return max(1, (xp // 100) + 1)
+
+def safe_add_xp(user, xp_to_add: int):
+    user.xp = max(0, user.xp + xp_to_add)
+    user.level = get_level(user.xp)
+
+def safe_subtract_xp(user, xp_to_subtract: int):
+    user.xp = max(0, user.xp - xp_to_subtract)
+    user.level = get_level(user.xp)
+
+def safe_set_xp(user, new_xp: int):
+    user.xp = max(0, new_xp)
+    user.level = get_level(user.xp) 

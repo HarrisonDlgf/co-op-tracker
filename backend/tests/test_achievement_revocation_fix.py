@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Test script to verify achievement revocation works properly when clearing all applications.
 This tests the fix for level and XP-based achievements not being revoked.

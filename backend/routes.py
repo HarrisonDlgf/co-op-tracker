@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, current_app
-from models import Application, User, Achievement, calculate_xp, get_level
+from models import Application, User, Achievement, calculate_xp, get_level, safe_add_xp, safe_subtract_xp, safe_set_xp
 from database import db
 from datetime import datetime, timedelta, timezone
 from achievements.achievements_utils import ACHIEVEMENTS
@@ -148,13 +148,10 @@ def check_and_award_achievements(user: User):
             # Award XP for unlocking achievement
             xp_reward = achievement_def.get('xp_reward', 0)
             if xp_reward > 0:
-                user.xp += xp_reward
+                safe_add_xp(user, xp_reward)
                 total_xp_gained += xp_reward
     
     if new_achievements or total_xp_gained > 0:
-        # Update user level if XP was gained
-        if total_xp_gained > 0:
-            user.level = get_level(user.xp)
         db.session.commit()
     
     return new_achievements, total_xp_gained
@@ -171,15 +168,13 @@ def check_and_revoke_achievements(user: User):
         if achievement_definition and not achievement_definition['condition'](user):
             xp_reward = achievement_definition.get('xp_reward', 0)
             if xp_reward > 0:
-                user.xp -= xp_reward
+                safe_subtract_xp(user, xp_reward)
                 total_xp_lost += xp_reward
             
             db.session.delete(achievement)
             revoked_achievements.append(achievement)
     
     if revoked_achievements or total_xp_lost > 0:
-        if total_xp_lost > 0:
-            user.level = get_level(user.xp)
         db.session.commit()
     
     return revoked_achievements, total_xp_lost
@@ -240,8 +235,7 @@ def add_app():
         xp_gained = 50
     
     if xp_gained > 0:
-        current_user.xp += xp_gained
-        current_user.level = get_level(current_user.xp)
+        safe_add_xp(current_user, xp_gained)
         db.session.commit()
     
     # Check for new achievements
@@ -305,8 +299,7 @@ def update_app(app_id):
                 xp_gained = 50
             
             if xp_gained > 0:
-                current_user.xp += xp_gained
-                current_user.level = get_level(current_user.xp)
+                safe_add_xp(current_user, xp_gained)
                 db.session.commit()
     
     # Check for new achievements
@@ -348,8 +341,7 @@ def delete_app(app_id):
     db.session.delete(app)
     
     # Subtract XP from user's total
-    current_user.xp -= xp_to_subtract
-    current_user.level = get_level(current_user.xp)
+    safe_subtract_xp(current_user, xp_to_subtract)
     
     db.session.commit()
     
@@ -557,8 +549,7 @@ def bulk_import_applications():
             db.session.commit()
             
             if result.total_xp_gained > 0:
-                current_user.xp += result.total_xp_gained
-                current_user.level = get_level(current_user.xp)
+                safe_add_xp(current_user, result.total_xp_gained)
                 db.session.commit()
             
             new_achievements, xp_from_achievements = check_and_award_achievements(current_user)
@@ -651,8 +642,7 @@ def clear_all_applications():
         
         db.session.commit()
         
-        current_user.xp = 0
-        current_user.level = get_level(current_user.xp)
+        safe_set_xp(current_user, 0)
         db.session.commit()
         
         # Check for revoked achievements 
