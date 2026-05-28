@@ -1,10 +1,14 @@
+import os
+import time
+
 from flask import Flask
 from flask_cors import CORS
+from dotenv import load_dotenv
+from sqlalchemy.exc import OperationalError
+
+from config import config
 from database import db
 from routes import app_routes
-import os
-from config import config
-from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,15 +19,6 @@ def create_app(config_name=None):
     # Load configuration
     config_name = config_name or os.environ.get('FLASK_ENV', 'development')
     app.config.from_object(config[config_name])
-    
-    # SSL for PostgreSQL on Render
-    if os.environ.get('DATABASE_URL'):
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-        
-        # if in sqlalchemy engine options, apply the ssl configuration
-        if hasattr(config[config_name], 'SQLALCHEMY_ENGINE_OPTIONS'):
-            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = config[config_name].SQLALCHEMY_ENGINE_OPTIONS
-            print("SSL configuration applied for PostgreSQL") # debugging message
     
     # Initialize extensions
     db.init_app(app)
@@ -36,11 +31,21 @@ def create_app(config_name=None):
     
     return app
 
-app = create_app()
+def init_db(app, max_retries=5, retry_delay=3):
+    """Create tables; retry while Render Postgres wakes from sleep."""
+    for attempt in range(max_retries):
+        try:
+            with app.app_context():
+                db.create_all()
+            return
+        except OperationalError:
+            if attempt == max_retries - 1:
+                raise
+            time.sleep(retry_delay * (attempt + 1))
 
-# Ensure database tables are created
-with app.app_context():
-    db.create_all()
+
+app = create_app()
+init_db(app)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))

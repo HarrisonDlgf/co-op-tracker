@@ -1,5 +1,43 @@
 import os
 from datetime import timedelta
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+
+
+def is_postgres_url(url):
+    return bool(
+        url
+        and (
+            url.startswith('postgres://')
+            or url.startswith('postgresql://')
+            or url.startswith('postgresql+')
+        )
+    )
+
+
+def normalize_database_url(url):
+    """Render Postgres needs postgresql:// and sslmode=require."""
+    if not url or not is_postgres_url(url):
+        return url
+    if url.startswith('postgres://'):
+        url = url.replace('postgres://', 'postgresql://', 1)
+    parsed = urlparse(url)
+    query = parse_qs(parsed.query)
+    if 'sslmode' not in query:
+        query['sslmode'] = ['require']
+    return urlunparse(parsed._replace(query=urlencode(query, doseq=True)))
+
+
+POSTGRES_ENGINE_OPTIONS = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+    'max_overflow': 20,
+    'connect_args': {
+        'sslmode': 'require',
+        'connect_timeout': 10,
+        'application_name': 'coop-tracker',
+    },
+}
+
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
@@ -8,23 +46,11 @@ class Config:
     
     # Database Configuration
     DATABASE_URL = os.environ.get('DATABASE_URL') or 'sqlite:///instance/coop_tracker.db'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///instance/coop_tracker.db'
+    SQLALCHEMY_DATABASE_URI = normalize_database_url(DATABASE_URL)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # config for ssl connection for prod 
-    if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
-        SQLALCHEMY_DATABASE_URI = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-        
-        SQLALCHEMY_ENGINE_OPTIONS = {
-            'pool_pre_ping': True,        
-            'pool_recycle': 300,         
-            'max_overflow': 20,           
-            'connect_args': {
-                'sslmode': 'require',     
-                'connect_timeout': 10,    
-                'application_name': 'coop-tracker'  # Identify your app in logs
-            }
-        }
+    if is_postgres_url(DATABASE_URL):
+        SQLALCHEMY_ENGINE_OPTIONS = POSTGRES_ENGINE_OPTIONS
     
     # CORS
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3000,https://co-op-tracker-orcin.vercel.app').split(',')
